@@ -1,9 +1,27 @@
 import { Redis } from '@upstash/redis';
-const redis = new Redis({ url: process.env.UPSTASH_REDIS_REST_URL, token: process.env.UPSTASH_REDIS_REST_TOKEN });
 
 export default async function handler(req, res) {
-  const { url } = req.body;
-  const id = Math.random().toString(36).substring(2, 8);
-  await redis.set(id, url);
-  res.status(200).json({ shortUrl: `${req.headers['x-forwarded-proto']}://${req.headers.host}/${id}` });
+  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: 'URL is required' });
+
+    // Initialize Redis inside the handler to catch initialization errors
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+
+    const id = Math.random().toString(36).substring(2, 8);
+    await redis.set(id, url);
+
+    const host = req.headers.host;
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    
+    return res.status(200).json({ shortUrl: `${protocol}://${host}/${id}` });
+  } catch (error) {
+    console.error('CRASH LOG:', error); // This will show in Vercel Logs
+    return res.status(500).json({ error: error.message });
+  }
 }
