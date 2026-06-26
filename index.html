@@ -22,7 +22,14 @@
                 });
 
                 const data = await response.json();
-                output.innerText = "Shortened: " + data.shortUrl;
+               // output.innerText = "Shortened: " + data.shortUrl;
+
+                // ... inside your fetch call
+const data = await res.json();
+if (data.shortUrl) {
+    // Just display it, do not try to redirect the user here!
+    document.getElementById('out').innerHTML = `Your link: <a href="${data.shortUrl}" target="_blank">${data.shortUrl}</a>`;
+}
             } catch (err) {
                 console.error("Fetch failed:", err);
             }
