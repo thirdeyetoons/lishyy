@@ -1,34 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>URL Shortener</title>
-</head>
+<html>
 <body>
-    <input type="text" id="urlInput" placeholder="Paste your long link here">
-    <button id="shortenBtn">Shorten URL</button>
-    <p id="resultArea" style="display:none;">
-        Your shortened URL: <input id="shortUrlDisplay" readonly>
-    </p>
-
+    <input type="text" id="url" placeholder="Paste link here">
+    <button id="btn">Shorten</button>
+    <p id="out"></p>
+    
     <script>
-        document.getElementById('shortenBtn').addEventListener('click', async () => {
-            const urlInput = document.getElementById('urlInput').value;
-            console.log("Button clicked!"); // Check if this appears in console!
+        const btn = document.getElementById('btn');
+        const urlInput = document.getElementById('url');
+        const output = document.getElementById('out');
 
-            const res = await fetch('/api/shorten', { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ url: urlInput }) 
-            });
-
-            const data = await res.json();
+        btn.addEventListener('click', async () => {
+            console.log("Button pressed"); // Check the F12 console for this!
+            const longUrl = urlInput.value;
             
-            if (data.shortUrl) {
-                document.getElementById('shortUrlDisplay').value = data.shortUrl;
-                document.getElementById('resultArea').style.display = 'block';
-            } else {
-                alert("Error: " + data.error);
+            try {
+                const response = await fetch('/api/shorten', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: longUrl })
+                });
+
+                const data = await response.json();
+                output.innerText = "Shortened: " + data.shortUrl;
+            } catch (err) {
+                console.error("Fetch failed:", err);
             }
         });
     </script>
