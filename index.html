@@ -3,28 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <title>URL Shortener</title>
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <input id="urlInput" class="w-full p-2 border mb-4" placeholder="Paste URL">
-        <button id="shortenBtn" class="w-full bg-blue-600 text-white py-2 rounded">Shorten</button>
-        <div id="resultArea" class="hidden mt-4">
-            <input id="shortUrlDisplay" readonly class="w-full p-2 border bg-gray-50">
-        </div>
-    </div>
+<body>
+    <input type="text" id="urlInput" placeholder="Paste your long link here">
+    <button id="shortenBtn">Shorten URL</button>
+    <p id="resultArea" style="display:none;">
+        Your shortened URL: <input id="shortUrlDisplay" readonly>
+    </p>
+
     <script>
-        document.getElementById('shortenBtn').onclick = async () => {
-            const url = document.getElementById('urlInput').value;
+        document.getElementById('shortenBtn').addEventListener('click', async () => {
+            const urlInput = document.getElementById('urlInput').value;
+            console.log("Button clicked!"); // Check if this appears in console!
+
             const res = await fetch('/api/shorten', { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ url }) 
+                body: JSON.stringify({ url: urlInput }) 
             });
+
             const data = await res.json();
-            document.getElementById('shortUrlDisplay').value = data.shortUrl;
-            document.getElementById('resultArea').classList.remove('hidden');
-        };
+            
+            if (data.shortUrl) {
+                document.getElementById('shortUrlDisplay').value = data.shortUrl;
+                document.getElementById('resultArea').style.display = 'block';
+            } else {
+                alert("Error: " + data.error);
+            }
+        });
     </script>
 </body>
 </html>
